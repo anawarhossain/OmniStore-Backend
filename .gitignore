@@ -5,6 +5,7 @@ node_modules
 .claude
 .windsurf
 DETAILED_FIXES_REPORT.MD
+FIXES_APPLIED.md
 
 
 /src/generated/prisma
