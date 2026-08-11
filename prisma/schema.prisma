@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output = "../src/generated/prisma"
 }
 
 datasource db {
@@ -12,6 +13,8 @@ model User{
   email String @unique
   age Int
   createdAt DateTime @default(now())
+
+  @@map("users")
 }
 
 model Product{
@@ -19,4 +22,25 @@ model Product{
   title String
   price Float
   createdAt DateTime @default(now())
+
+  @@map("product")
+}
+
+model Category{
+  id String @id @default(uuid())
+  name String @unique
+  createdAt DateTime @default(now())
+
+  @@map("category")
+}
+
+model Order{
+  id String @id @default(uuid())
+  userId String
+  productId String
+  quantity Int
+  status String @default("PENDING")
+  createdAt DateTime @default(now())
+
+  @@map("order")
 }

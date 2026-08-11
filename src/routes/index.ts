@@ -1,6 +1,8 @@
 import { Router, Request, Response } from 'express';
 import * as userService from '../services/users';
 import * as productService from '../services/products';
+import * as categoryService from '../services/categories';
+import * as orderService from '../services/orders';
 
 const router = Router();
 
@@ -138,6 +140,145 @@ router.delete('/products/:id', async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Product not found' });
     }
     res.status(500).json({ error: 'Failed to delete product' });
+  }
+});
+
+// Category routes
+router.get('/categories', async (req: Request, res: Response) => {
+  try {
+    const categories = await categoryService.getAllCategories();
+    res.json(categories);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch categories' });
+  }
+});
+
+router.get('/categories/:id', async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const category = await categoryService.getCategoryById(id);
+    if (!category) {
+      return res.status(404).json({ error: 'Category not found' });
+    }
+    res.json(category);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch category' });
+  }
+});
+
+router.post('/categories', async (req: Request, res: Response) => {
+  try {
+    const { name } = req.body;
+    if (!name) {
+      return res.status(400).json({ error: 'Name is required' });
+    }
+    const category = await categoryService.createCategory({ name });
+    res.status(201).json(category);
+  } catch (error: any) {
+    if (error.code === 'P2002') {
+      return res.status(409).json({ error: 'Category name already exists' });
+    }
+    res.status(500).json({ error: 'Failed to create category' });
+  }
+});
+
+router.put('/categories/:id', async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const { name } = req.body;
+    const category = await categoryService.updateCategory(id, { name });
+    res.json(category);
+  } catch (error: any) {
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'Category not found' });
+    }
+    if (error.code === 'P2002') {
+      return res.status(409).json({ error: 'Category name already exists' });
+    }
+    res.status(500).json({ error: 'Failed to update category' });
+  }
+});
+
+router.delete('/categories/:id', async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    await categoryService.deleteCategory(id);
+    res.status(204).send();
+  } catch (error: any) {
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'Category not found' });
+    }
+    res.status(500).json({ error: 'Failed to delete category' });
+  }
+});
+
+// Order routes
+router.get('/orders', async (req: Request, res: Response) => {
+  try {
+    const orders = await orderService.getAllOrders();
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch orders' });
+  }
+});
+
+router.get('/orders/:id', async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const order = await orderService.getOrderById(id);
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+    res.json(order);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch order' });
+  }
+});
+
+router.post('/orders', async (req: Request, res: Response) => {
+  try {
+    const { userId, productId, quantity } = req.body;
+    if (!userId || !productId || !quantity) {
+      return res
+        .status(400)
+        .json({ error: 'User ID, product ID, and quantity are required' });
+    }
+    const order = await orderService.createOrder({ userId, productId, quantity });
+    res.status(201).json(order);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create order' });
+  }
+});
+
+router.put('/orders/:id', async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const { userId, productId, quantity, status } = req.body;
+    const order = await orderService.updateOrder(id, {
+      userId,
+      productId,
+      quantity,
+      status,
+    });
+    res.json(order);
+  } catch (error: any) {
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+    res.status(500).json({ error: 'Failed to update order' });
+  }
+});
+
+router.delete('/orders/:id', async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    await orderService.deleteOrder(id);
+    res.status(204).send();
+  } catch (error: any) {
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+    res.status(500).json({ error: 'Failed to delete order' });
   }
 });
 
