@@ -6,15 +6,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const routes_1 = __importDefault(require("./routes"));
+const response_1 = require("./lib/response");
 const app = (0, express_1.default)();
-// Middleware
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
-// Routes
 app.use('/api', routes_1.default);
-// 404 handler
 app.use((req, res) => {
-    res.status(404).json({ error: 'Route not found' });
+    return (0, response_1.fail)(res, 'Route not found', 404);
+});
+app.use((err, req, res, next) => {
+    console.error(err);
+    return (0, response_1.fail)(res, 'Internal server error', 500);
 });
 exports.default = app;

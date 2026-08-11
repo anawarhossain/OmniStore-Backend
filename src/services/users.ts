@@ -1,26 +1,50 @@
+import bcrypt from 'bcrypt';
 import prisma from '../lib/prisma';
 
+const SALT_ROUNDS = 10;
+
+const publicUser = {
+  id: true,
+  name: true,
+  email: true,
+  role: true,
+  age: true,
+  createdAt: true,
+  updatedAt: true,
+} as const;
+
 export const getAllUsers = async () => {
-  return await prisma.user.findMany({
-    orderBy: {
-      createdAt: 'desc',
-    },
+  return prisma.user.findMany({
+    where: { isDeleted: false },
+    orderBy: { createdAt: 'desc' },
+    select: publicUser,
   });
 };
 
 export const getUserById = async (id: string) => {
-  return await prisma.user.findUnique({
-    where: { id },
+  return prisma.user.findFirst({
+    where: { id, isDeleted: false },
+    select: publicUser,
   });
 };
 
 export const createUser = async (data: {
   name: string;
   email: string;
-  age: number;
+  password: string;
+  age?: number;
+  role?: 'CUSTOMER' | 'ADMIN';
 }) => {
-  return await prisma.user.create({
-    data,
+  const password = await bcrypt.hash(data.password, SALT_ROUNDS);
+  return prisma.user.create({
+    data: {
+      name: data.name,
+      email: data.email,
+      password,
+      age: data.age,
+      role: data.role,
+    },
+    select: publicUser,
   });
 };
 
@@ -30,16 +54,33 @@ export const updateUser = async (
     name?: string;
     email?: string;
     age?: number;
+    password?: string;
+    role?: 'CUSTOMER' | 'ADMIN';
   }
 ) => {
-  return await prisma.user.update({
+  const { password, ...rest } = data;
+  const updateData: {
+    name?: string;
+    email?: string;
+    age?: number;
+    password?: string;
+    role?: 'CUSTOMER' | 'ADMIN';
+  } = { ...rest };
+
+  if (password) {
+    updateData.password = await bcrypt.hash(password, SALT_ROUNDS);
+  }
+
+  return prisma.user.update({
     where: { id },
-    data,
+    data: updateData,
+    select: publicUser,
   });
 };
 
 export const deleteUser = async (id: string) => {
-  return await prisma.user.delete({
+  return prisma.user.update({
     where: { id },
+    data: { isDeleted: true },
   });
 };

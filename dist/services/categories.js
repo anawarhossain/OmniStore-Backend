@@ -6,35 +6,33 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteCategory = exports.updateCategory = exports.createCategory = exports.getCategoryById = exports.getAllCategories = void 0;
 const prisma_1 = __importDefault(require("../lib/prisma"));
 const getAllCategories = async () => {
-    return await prisma_1.default.category.findMany({
-        orderBy: {
-            createdAt: 'desc',
-        },
+    return prisma_1.default.category.findMany({
+        where: { isDeleted: false },
+        orderBy: { createdAt: 'desc' },
     });
 };
 exports.getAllCategories = getAllCategories;
 const getCategoryById = async (id) => {
-    return await prisma_1.default.category.findUnique({
-        where: { id },
+    return prisma_1.default.category.findFirst({
+        where: { id, isDeleted: false },
     });
 };
 exports.getCategoryById = getCategoryById;
 const createCategory = async (data) => {
-    return await prisma_1.default.category.create({
-        data,
-    });
+    return prisma_1.default.category.create({ data });
 };
 exports.createCategory = createCategory;
 const updateCategory = async (id, data) => {
-    return await prisma_1.default.category.update({
+    return prisma_1.default.category.update({
         where: { id },
         data,
     });
 };
 exports.updateCategory = updateCategory;
 const deleteCategory = async (id) => {
-    return await prisma_1.default.category.delete({
+    return prisma_1.default.category.update({
         where: { id },
+        data: { isDeleted: true },
     });
 };
 exports.deleteCategory = deleteCategory;

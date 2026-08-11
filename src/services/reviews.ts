@@ -1,7 +1,7 @@
 import prisma from '../lib/prisma';
 
-export const getAllOrders = async () => {
-  return prisma.order.findMany({
+export const getAllReviews = async () => {
+  return prisma.review.findMany({
     where: { isDeleted: false },
     orderBy: { createdAt: 'desc' },
     include: {
@@ -11,8 +11,8 @@ export const getAllOrders = async () => {
   });
 };
 
-export const getOrderById = async (id: string) => {
-  return prisma.order.findFirst({
+export const getReviewById = async (id: string) => {
+  return prisma.review.findFirst({
     where: { id, isDeleted: false },
     include: {
       user: { select: { id: true, name: true, email: true } },
@@ -21,13 +21,23 @@ export const getOrderById = async (id: string) => {
   });
 };
 
-export const createOrder = async (data: {
+export const getReviewsByProduct = async (productId: string) => {
+  return prisma.review.findMany({
+    where: { productId, isDeleted: false },
+    orderBy: { createdAt: 'desc' },
+    include: {
+      user: { select: { id: true, name: true, email: true } },
+    },
+  });
+};
+
+export const createReview = async (data: {
+  rating: number;
+  comment?: string;
   userId: string;
   productId: string;
-  quantity: number;
-  status?: 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
 }) => {
-  return prisma.order.create({
+  return prisma.review.create({
     data,
     include: {
       user: { select: { id: true, name: true, email: true } },
@@ -36,16 +46,14 @@ export const createOrder = async (data: {
   });
 };
 
-export const updateOrder = async (
+export const updateReview = async (
   id: string,
   data: {
-    userId?: string;
-    productId?: string;
-    quantity?: number;
-    status?: 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+    rating?: number;
+    comment?: string;
   }
 ) => {
-  return prisma.order.update({
+  return prisma.review.update({
     where: { id },
     data,
     include: {
@@ -55,8 +63,8 @@ export const updateOrder = async (
   });
 };
 
-export const deleteOrder = async (id: string) => {
-  return prisma.order.update({
+export const deleteReview = async (id: string) => {
+  return prisma.review.update({
     where: { id },
     data: { isDeleted: true },
   });

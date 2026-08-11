@@ -4,37 +4,64 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteUser = exports.updateUser = exports.createUser = exports.getUserById = exports.getAllUsers = void 0;
+const bcrypt_1 = __importDefault(require("bcrypt"));
 const prisma_1 = __importDefault(require("../lib/prisma"));
+const SALT_ROUNDS = 10;
+const publicUser = {
+    id: true,
+    name: true,
+    email: true,
+    role: true,
+    age: true,
+    createdAt: true,
+    updatedAt: true,
+};
 const getAllUsers = async () => {
-    return await prisma_1.default.user.findMany({
-        orderBy: {
-            createdAt: 'desc',
-        },
+    return prisma_1.default.user.findMany({
+        where: { isDeleted: false },
+        orderBy: { createdAt: 'desc' },
+        select: publicUser,
     });
 };
 exports.getAllUsers = getAllUsers;
 const getUserById = async (id) => {
-    return await prisma_1.default.user.findUnique({
-        where: { id },
+    return prisma_1.default.user.findFirst({
+        where: { id, isDeleted: false },
+        select: publicUser,
     });
 };
 exports.getUserById = getUserById;
 const createUser = async (data) => {
-    return await prisma_1.default.user.create({
-        data,
+    const password = await bcrypt_1.default.hash(data.password, SALT_ROUNDS);
+    return prisma_1.default.user.create({
+        data: {
+            name: data.name,
+            email: data.email,
+            password,
+            age: data.age,
+            role: data.role,
+        },
+        select: publicUser,
     });
 };
 exports.createUser = createUser;
 const updateUser = async (id, data) => {
-    return await prisma_1.default.user.update({
+    const { password, ...rest } = data;
+    const updateData = { ...rest };
+    if (password) {
+        updateData.password = await bcrypt_1.default.hash(password, SALT_ROUNDS);
+    }
+    return prisma_1.default.user.update({
         where: { id },
-        data,
+        data: updateData,
+        select: publicUser,
     });
 };
 exports.updateUser = updateUser;
 const deleteUser = async (id) => {
-    return await prisma_1.default.user.delete({
+    return prisma_1.default.user.update({
         where: { id },
+        data: { isDeleted: true },
     });
 };
 exports.deleteUser = deleteUser;
