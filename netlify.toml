@@ -1,0 +1,12 @@
+[build]
+  command = "npx prisma generate && npm run build"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["@prisma/client", "@prisma/adapter-pg", "pg", "express", "bcryptjs", "jsonwebtoken", "dotenv", "cors"]
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200

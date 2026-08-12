@@ -9,3 +9,6 @@ FIXES_APPLIED.md
 
 
 /src/generated/prisma
+
+# Local Netlify folder
+.netlify

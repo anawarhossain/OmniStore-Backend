@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getMe = exports.login = exports.register = void 0;
-const bcrypt_1 = __importDefault(require("bcrypt"));
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const prisma_1 = __importDefault(require("../lib/prisma"));
 const jwt_1 = require("../lib/jwt");
 const users_1 = require("./users");
@@ -22,7 +22,7 @@ const login = async (data) => {
         throw new Error('INVALID_CREDENTIALS');
     }
     const { password, ...safeUser } = user;
-    const valid = await bcrypt_1.default.compare(data.password, password);
+    const valid = await bcryptjs_1.default.compare(data.password, password);
     if (!valid) {
         throw new Error('INVALID_CREDENTIALS');
     }

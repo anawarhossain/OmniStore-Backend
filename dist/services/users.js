@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteUser = exports.updateUser = exports.createUser = exports.getUserById = exports.getAllUsers = void 0;
-const bcrypt_1 = __importDefault(require("bcrypt"));
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const prisma_1 = __importDefault(require("../lib/prisma"));
 const SALT_ROUNDS = 10;
 const publicUser = {
@@ -32,7 +32,7 @@ const getUserById = async (id) => {
 };
 exports.getUserById = getUserById;
 const createUser = async (data) => {
-    const password = await bcrypt_1.default.hash(data.password, SALT_ROUNDS);
+    const password = await bcryptjs_1.default.hash(data.password, SALT_ROUNDS);
     return prisma_1.default.user.create({
         data: {
             name: data.name,
@@ -49,7 +49,7 @@ const updateUser = async (id, data) => {
     const { password, ...rest } = data;
     const updateData = { ...rest };
     if (password) {
-        updateData.password = await bcrypt_1.default.hash(password, SALT_ROUNDS);
+        updateData.password = await bcryptjs_1.default.hash(password, SALT_ROUNDS);
     }
     return prisma_1.default.user.update({
         where: { id },
