@@ -83,6 +83,9 @@ router.post('/', auth_1.authenticate, async (req, res) => {
 router.put('/:id', auth_1.authenticate, async (req, res) => {
     try {
         const { userId, productId, quantity, status } = req.body;
+        if (status && req.user?.role !== 'ADMIN') {
+            return (0, response_1.fail)(res, 'Only admins can update order status', 403);
+        }
         const order = await orderService.updateOrder(req.params.id, {
             userId,
             productId,

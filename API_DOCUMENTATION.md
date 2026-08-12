@@ -208,9 +208,9 @@ Obtain a token via `POST /api/auth/login` or `POST /api/auth/register`.
 
 ### PUT /api/orders/:id
 - **Description:** Update an order. Fields are optional.
-- **Auth:** Bearer token
+- **Auth:** Bearer token. Changing `status` requires an **ADMIN** role (customers get `403`).
 - **Request Body:** same shape as POST
-- **Status Codes:** `200` ok · `400` user/product doesn't exist · `401` not authenticated · `404` not found
+- **Status Codes:** `200` ok · `400` user/product doesn't exist · `401` not authenticated · `403` non-admin trying to change status · `404` not found
 
 ### DELETE /api/orders/:id
 - **Description:** Soft-delete an order.
